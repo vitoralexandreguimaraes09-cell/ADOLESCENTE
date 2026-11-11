@@ -5,3 +5,36 @@
 @media(max-width:800px){.app{padding:18px 12px}.topo{align-items:flex-start;flex-direction:column;margin-bottom:17px}.topo-acoes{width:100%;justify-content:space-between;flex-wrap:wrap}.topo-texto{font-size:12px}.introducao{padding:30px 25px;min-height:auto}.ilustracao{flex-basis:220px;height:220px}.sol{width:155px;height:155px}.dado-grande,.peca-grande{transform:scale(.8)}.dado-grande{translate:20px -5px}.peca-grande{translate:-20px 25px}.painel-jogo{padding:17px 12px}.resumo-partida{grid-template-columns:1fr 1.3fr;gap:14px;padding:13px}.resumo-dado{grid-column:1/-1}.tabuleiro-externo{padding:5px;border-radius:16px}.area-acao{align-items:stretch;flex-direction:column}.controles{justify-content:flex-end}.legenda-dica{margin-left:0}.tabuleiro-legenda{gap:10px}.cabecalho-jogo h2{font-size:22px}.tabuleiro-svg{min-width:650px}.tabuleiro-externo{overflow-x:auto}.tabuleiro-externo::-webkit-scrollbar{height:8px}.tabuleiro-externo::-webkit-scrollbar-thumb{background:#48527e;border-radius:10px}}
 @media(max-width:520px){.introducao{display:block;padding:27px 21px}.introducao h2{font-size:39px}.introducao p{font-size:14px}.ilustracao{height:175px;margin-top:8px}.sol{width:130px;height:130px}.dado-grande{width:64px;height:64px;font-size:40px;border-radius:17px;translate:24px -4px}.peca-grande{width:62px;height:62px;font-size:37px;border-width:5px;border-radius:20px;box-shadow:0 10px 0 #b7447a;translate:-14px 23px}.resumo-partida{grid-template-columns:1fr 1fr}.progresso-bloco{grid-column:1/-1;grid-row:2}.resumo-dado{grid-column:auto}.tabuleiro-svg{min-width:600px}.tabuleiro-legenda{font-size:10px}.botao-jogar{flex:1;min-width:0}.dado-visual{flex:0 0 48px;width:48px;height:48px}.cabecalho-jogo{align-items:flex-start}.botao-secundario{font-size:12px;padding:9px 10px}.tela-final{padding:42px 20px}.janela-dado,.janela-carta{padding:30px 20px}.dado-centro{width:125px;height:125px;font-size:85px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Ajustes finais de responsividade: o tabuleiro se reorganiza em formato vertical no celular. */
+.tabuleiro-externo{width:100%;min-width:0;overflow:hidden}
+.tabuleiro-svg{width:100%;min-width:0!important;max-height:none;height:auto}
+@media(max-width:600px){
+  .app{padding:12px 9px 16px}
+  .topo{gap:12px}
+  .topo-acoes{align-items:stretch;gap:10px}
+  .topo-texto{flex:1 1 100%;line-height:1.5}
+  .audio-toggle{align-self:flex-start}
+  .painel-jogo{padding:14px 9px;border-radius:20px}
+  .resumo-partida{gap:9px;padding:10px}
+  .resumo-item{gap:7px}
+  .resumo-icone{width:34px;height:34px;flex:0 0 34px;font-size:16px}
+  .resumo-item small,.progresso-info small{font-size:9px;letter-spacing:.5px}
+  .resumo-item strong,.progresso-info strong{font-size:13px}
+  .tabuleiro-externo{padding:4px;border-radius:13px}
+  .tabuleiro-svg{display:block}
+  .tabuleiro-legenda{font-size:10px;gap:9px}
+  .legenda-dica{flex:1 1 100%}
+  .area-acao{gap:12px}
+  .controles{width:100%;gap:10px}
+  .botao-jogar{flex:1;min-width:0;padding:13px 10px}
+  .mensagem-jogada strong{font-size:13px}
+  .mensagem-jogada p{font-size:11px}
+  .janela-carta,.janela-dado{padding:26px 18px;border-radius:22px}
+  .janela-carta h2{font-size:clamp(25px,7vw,36px)}
+}
+@media(min-width:601px) and (max-width:900px){
+  .tabuleiro-svg{min-width:0!important}
+  .resumo-partida{gap:10px}
+  .painel-jogo{padding:20px 14px}
+}

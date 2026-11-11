@@ -1,5 +1,5 @@
 const TOTAL_CASAS = 40;
-const casasDeCartas = {3:1, 6:2, 9:3, 12:4, 15:5, 18:6, 21:7, 24:8, 27:9, 30:10, 33:11, 36:12, 39:13};
+const TOTAL_CARTAS = 13;
 const facesDado = ['⚀','⚁','⚂','⚃','⚄','⚅'];
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const tabuleiro = document.getElementById('tabuleiro');
@@ -117,14 +117,29 @@ function criarElementoSvg(nome, atributos = {}) {
 // Pontos-guia em zigue-zague, ligados por curvas suaves para formar uma estrada contínua.
 function criarPontosGuia() {
   const resultado = [];
-  const xs = [90, 207, 324, 441, 558, 675, 792, 909];
-  const ys = [520, 410, 300, 190, 80];
-  for (let linha = 0; linha < 5; linha++) {
-    const listaX = linha % 2 === 0 ? xs : [...xs].reverse();
-    listaX.forEach((x, coluna) => {
-      const deslocamento = (coluna % 2 === 0 ? -5 : 5);
-      resultado.push({x, y: ys[linha] + deslocamento});
-    });
+  const celular = window.matchMedia('(max-width: 600px)').matches;
+
+  if (celular) {
+    // No celular, o tabuleiro fica mais alto e estreito, sem exigir rolagem horizontal.
+    tabuleiro.setAttribute('viewBox', '0 0 600 1100');
+    const xs = [68, 184, 300, 416, 532];
+    for (let linha = 0; linha < 8; linha++) {
+      const listaX = linha % 2 === 0 ? xs : [...xs].reverse();
+      listaX.forEach((x, coluna) => {
+        resultado.push({ x, y: 70 + linha * 137 + (coluna % 2 === 0 ? -3 : 3) });
+      });
+    }
+  } else {
+    // Em telas grandes, o percurso fica mais largo, como um tabuleiro de mesa.
+    tabuleiro.setAttribute('viewBox', '0 0 1000 610');
+    const xs = [90, 207, 324, 441, 558, 675, 792, 909];
+    const ys = [520, 410, 300, 190, 80];
+    for (let linha = 0; linha < 5; linha++) {
+      const listaX = linha % 2 === 0 ? xs : [...xs].reverse();
+      listaX.forEach((x, coluna) => {
+        resultado.push({ x, y: ys[linha] + (coluna % 2 === 0 ? -5 : 5) });
+      });
+    }
   }
   return resultado;
 }
@@ -162,7 +177,8 @@ function criarCasas() {
   pontos.forEach((ponto, indice) => {
     const numero = indice + 1;
     const grupo = criarElementoSvg('g', {class: `casa-svg cor-${(numero - 1) % 6}`, transform: `translate(${ponto.x} ${ponto.y})`});
-    if (casasDeCartas[numero]) grupo.classList.add('casa-carta');
+    // Todas as casas do percurso podem indicar uma carta física.
+    grupo.classList.add('casa-carta');
     if (numero === 1) grupo.classList.add('casa-inicio');
     if (numero === TOTAL_CASAS) grupo.classList.add('casa-final');
 
@@ -171,11 +187,9 @@ function criarCasas() {
     numeroEl.textContent = numero;
     grupo.append(circulo, numeroEl);
 
-    if (casasDeCartas[numero]) {
-      const icone = criarElementoSvg('text', {class:'carta-simbolo', x:0, y:15});
-      icone.textContent = '✦';
-      grupo.appendChild(icone);
-    }
+    const icone = criarElementoSvg('text', {class:'carta-simbolo', x:0, y:15});
+    icone.textContent = '✦';
+    grupo.appendChild(icone);
     if (numero === 1 || numero === TOTAL_CASAS) {
       const marca = criarElementoSvg('text', {class:'carta-simbolo', x:0, y:34});
       marca.textContent = numero === 1 ? 'INÍCIO' : 'FIM';
@@ -214,20 +228,17 @@ function abrirCarta(numeroCarta) {
   fecharCartaBtn.focus();
 }
 
+function sortearNumeroCarta() {
+  // Sorteia uma das 13 cartas sempre que o peão termina uma jogada.
+  return Math.floor(Math.random() * TOTAL_CARTAS) + 1;
+}
+
 function verificarCasa() {
   atualizarInterface();
-  if (posicao === TOTAL_CASAS) {
-    finalizarPartida();
-    return;
-  }
-  if (casasDeCartas[posicao]) {
-    const numeroCarta = casasDeCartas[posicao];
-    mostrarMensagem('✦', `Pegue a carta de número ${numeroCarta}.`, 'Pegue a carta física indicada para continuar a conversa.');
-    tocarEfeito('carta');
-    abrirCarta(numeroCarta);
-  } else {
-    mostrarMensagem('🌟', `Você chegou à casa ${posicao}.`, 'Jogue o dado para continuar pelo caminho.');
-  }
+  const numeroCarta = sortearNumeroCarta();
+  mostrarMensagem('✦', `Pegue a carta de número ${numeroCarta}.`, 'Pegue a carta física indicada.');
+  tocarEfeito('carta');
+  abrirCarta(numeroCarta);
 }
 
 function animarPersonagem(destino, duracao = 600) {
@@ -329,6 +340,10 @@ function iniciarPartida() {
 function continuarDepoisDaCarta() {
   overlayCarta.classList.add('escondido');
   esperandoFecharCarta = false;
+  if (posicao === TOTAL_CASAS) {
+    finalizarPartida();
+    return;
+  }
   mostrarMensagem('🎲', 'Sua vez de continuar!', 'Clique em “Jogar o dado” para seguir pelo caminho.');
   jogarBtn.focus();
 }
@@ -339,11 +354,17 @@ document.getElementById('jogarNovamenteBtn').addEventListener('click', iniciarPa
 jogarBtn.addEventListener('click', jogarDado);
 fecharCartaBtn.addEventListener('click', continuarDepoisDaCarta);
 audioBtn.addEventListener('click', alternarAudio);
+let temporizadorRedimensionamento;
 window.addEventListener('resize', () => {
-  if (!painelJogo.classList.contains('escondido')) {
-    // Mantém a posição da peça coerente se o tabuleiro for recalculado pelo navegador.
+  clearTimeout(temporizadorRedimensionamento);
+  temporizadorRedimensionamento = setTimeout(() => {
+    if (animacaoAtiva) return;
+    montarEstrada();
+    criarCasas();
     posicionarPersonagem(pontos[posicao - 1]);
-  }
+    Object.values(casasCriadas).forEach(casa => casa.classList.remove('casa-atual'));
+    casasCriadas[posicao]?.classList.add('casa-atual');
+  }, 180);
 });
 
 montarEstrada();
